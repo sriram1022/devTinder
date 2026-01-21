@@ -25,6 +25,13 @@ app.post("/saveUser",(req,res)=>{
     res.send({firstname:"mittu"})
 })
 
+
+// instead of this we can implement try and catch it is better way to handel error 
+
+app.use("/",(err,req,res,next)=>{
+    res.status(500).send("error in he code ");
+})
+
 app.listen(9999,()=>{
 
     console.log("server is running")
