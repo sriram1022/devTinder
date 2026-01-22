@@ -1,5 +1,9 @@
 const express = require('express');
 const app = express();
+const {connectionDb} = require("./src/config/database")
+
+
+require("./src/config/database")
 
 // app.use("/",(req,res)=>{
 //     res.send("hellow world")
@@ -22,7 +26,11 @@ app.get("/user/:userid/:name",(req,res)=>{
 });
 
 app.post("/saveUser",(req,res)=>{
-    res.send({firstname:"mittu"})
+    res.send({
+        firstname:"mittu",
+        age:27
+              
+    })
 })
 
 
@@ -32,8 +40,13 @@ app.use("/",(err,req,res,next)=>{
     res.status(500).send("error in he code ");
 })
 
-app.listen(9999,()=>{
-
+connectionDb().then(()=>{
+       console.log("db connected sucessfully");
+       app.listen(9999,()=>{
     console.log("server is running")
-
 })
+}).catch((err)=>{
+    console.log("unable to connect")  
+})
+
+
