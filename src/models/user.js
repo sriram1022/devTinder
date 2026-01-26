@@ -2,20 +2,48 @@ const mongoose = require("mongoose");
  
 const userSchema = new mongoose.Schema({
     firstName:{
-        type: String
+        type: String,
+        minlength: 3,
+        maxlength: 30,
+        required: true,
+        trim: true
     },
     lastName:{
-        type: String
+        type: String,
+        minlength: 3,
+        maxlength: 30,
+        required: true,
+        trim: true
     },
     emailId:{
-        type: String
+        type: String,
+        lowercase: true,
+        unique: true,
+        required: true,
+        trim: true
+    },
+    password:{
+        type: String,
+        required: true,
+        minlength: 6
     },
     age:{
-      type:Number
+      type:Number,
+        required:true,
+        min:18,
+        max:100
     },
     gender:{
-        type:String
+        type:String,
+        required:true,
+        validate(value){
+            if(!["male","female","other"].includes(value)){
+                throw new Error("gender must be male ,female or other");
+            }
+        }
     }
+},{
+    timestamps:true
 
 })
 
