@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+
+const validator = require("validator");
  
 const userSchema = new mongoose.Schema({
     firstName:{
@@ -20,7 +22,12 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
         unique: true,
         required: true,
-        trim: true
+        trim: true,
+        validate(value){
+            if(!validator.isEmail(value)){
+                throw new Error("invalid email format");
+            }
+        }
     },
     password:{
         type: String,
@@ -41,6 +48,24 @@ const userSchema = new mongoose.Schema({
                 throw new Error("gender must be male ,female or other");
             }
         }
+    },
+    skills:{
+        type:[String],
+        default:["javaScript","html","css"],
+        validate(value){
+            if(!Array.isArray(value)){
+                throw new Error("skills must be an array");
+            }
+            //length check only allow 3 skills
+            if(value.length<1){
+                throw new Error("atleast one skill is required");
+            }
+            if(value.length>3){
+                throw new Error("maximum 3 skills are allowed");
+            }
+
+        }
+
     }
 },{
     timestamps:true

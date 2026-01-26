@@ -111,12 +111,21 @@ app.delete("/deleteUser", async(req,res)=>{
       }
 })
 
-app.patch("/updateUser",async (req,res)=>{
-    let userId = req.body.userId;
-    
+app.patch("/updateUser/:userId",async (req,res)=>{
+    let userId = req.params.userId;
+    console.log(userId)
     let data = req.body;
-    
+    console.log(data)
+    let allowed_fields = ["firstName","lastName","gender","skills"]
+    let isUpdateisallowed = Object.keys(data).every(k=>
+        allowed_fields.includes(k)
+    );
     try{
+       if(!isUpdateisallowed){
+          throw new Error("update not allowed");
+          
+       }
+
        await UserModel.findByIdAndUpdate({_id:userId},data,{runValidators:true})
        res.send("sucessfully updated ")
     }
