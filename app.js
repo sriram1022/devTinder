@@ -2,8 +2,11 @@ const express = require('express');
 const app = express();
 const {connectionDb} = require("./src/config/database")
 const { UserModel } = require("./src/models/user")
+const bcrypt = require("bcrypt");
 
 require("./src/config/database")
+
+const{validationSignup}= require("./src/utils/validationSignup")
 
 app.use(express.json());
 
@@ -45,9 +48,21 @@ const{adminAuth} = require("./src/middleware/auth")
 
 app.post("/signup",async (req,res)=>{
      
-const userData = new UserModel(req.body);
-     try{
-      await userData.save();
+
+try{
+   
+    validationSignup(req.body);
+    const{firstName,lastName,emailId,password} = req.body
+    let hashPassword =  await bcrypt.hash(password,10);
+    console.log(hashPassword);
+    const userData = new UserModel({
+       firstName,
+       lastName,
+       emailId,
+       password: hashPassword
+
+    });
+    await userData.save();
 
     res.send("users data inserted successfully");
 
