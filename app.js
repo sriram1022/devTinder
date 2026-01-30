@@ -3,12 +3,17 @@ const app = express();
 const {connectionDb} = require("./src/config/database")
 const { UserModel } = require("./src/models/user")
 const bcrypt = require("bcrypt");
+const cookieParser = require('cookie-parser')
+var jwt = require('jsonwebtoken');
 
 require("./src/config/database")
+
+const validator = require("validator")
 
 const{validationSignup}= require("./src/utils/validationSignup")
 
 app.use(express.json());
+app.use(cookieParser())
 
 // app.use("/",(req,res)=>{
 //     res.send("hellow world")
@@ -17,7 +22,7 @@ app.use(express.json());
 //       res.send("this is 2nd rout")
 // })
 
-const{adminAuth} = require("./src/middleware/auth")
+const{tokenAuth} = require("./src/middleware/auth")
 
 // app.use("/admin",adminAuth)
 // app.get("/admin",(req,res)=>{
@@ -72,31 +77,66 @@ try{
      }
 })
 
-app.get("/getprofile", async(req,res)=>{
-    const userEmail = req.body.emailId;  // Changed from req.body to req.query
-    console.log(userEmail)
 
-    try{
-        let userDetails = await UserModel.find({emailId: userEmail});
-        res.send(userDetails);
+app.post("/login",async(req,res)=>{
+
+ try{
+     const {emailId,password} = req.body;
+     
+    if(!validator.isEmail(emailId)){
+    throw new Error("invalid credentionals");
+   }
+    let user = await UserModel.findOne({emailId})
+    
+    if(!user){
+        throw new Error("entered email is not found");
+    }
+    let dcryptedPassword = await bcrypt.compare(password,user.password);
+    if(!dcryptedPassword){
+        throw new Error("invalid credentionals")
+    }
+    else{
+        const token  = jwt.sign({userId: user._id}, "secretkey")
+        res.cookie("token",token);
+        res.send("login successful :" + token)
+        
+    }
+
+ }
+ catch(err){
+
+     res.status(500).send("error : " + err.message )
+
+
+ }
+
+
+})
+
+app.get("/getprofile", tokenAuth, async(req,res)=>{
+   
+  try{
+       const user = req.userDetails;
+       console.log(user)
+       res.send(user)
     }
     catch(err){
            res.status(500).send("error in fetching  user data")
     }
 })
 
-app.get("/getprofile", async(req,res)=>{
-    const userEmail = req.body.emailId;  // Changed from req.body to req.query
-    console.log(userEmail)
+// app.get("/getprofile", async(req,res)=>{
+//     const userEmail = req.body.emailId;  // Changed from req.body to req.query
+//     console.log(userEmail)
 
-    try{
-        let userDetails = await UserModel.find({emailId: userEmail});
-        res.send(userDetails);
-    }
-    catch(err){
-           res.status(500).send("error in fetching  user data")
-    }
-})
+//     try{
+//         let userDetails = await UserModel.find({emailId: userEmail});
+//         res.send(userDetails);
+//     }
+//     catch(err){
+//            res.status(500).send("error in fetching  user data")
+//     }
+// })
 
 app.get("/getAllprofile", async(req,res)=>{
     const userEmail = req.body.emailId;  // Changed from req.body to req.query
