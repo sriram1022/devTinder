@@ -66,6 +66,11 @@ const userSchema = new mongoose.Schema({
 
         }
 
+    },
+    photo:{
+        type :"String",
+        default:"https://www.pngall.com/wp-content/uploads/5/Profile-PNG-High-Quality-Image.png",
+
     }
 },{
     timestamps:true
